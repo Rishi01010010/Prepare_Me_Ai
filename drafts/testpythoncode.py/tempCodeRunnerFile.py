@@ -1,0 +1,1 @@
+response = chat_session.send_message(concatenated_text + " " + question)

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prepare_me_ai</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            color: #007bff;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px 5px;
+            font-size: 1em;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        form {
+            margin: 20px 0;
+        }
+        input[type="file"] {
+            display: block;
+            margin: 20px auto;
+            font-size: 1em;
+        }
+        #concepts a {
+            display: block;
+            margin: 10px 0;
+            color: #007bff;
+            text-decoration: none;
+        }
+        #concepts a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button id="codebutton" class="btn">Code Translator</button>
+        <h1>Prepare_me_ai</h1>
+        <form id="uploadForm">
+            <input type="file" id="pdfFile" name="pdfFile" accept=".pdf" required>
+            <button type="submit" class="btn">Upload PDF</button>
+        </form>
+        <div id="concepts"></div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('pdfFile', document.getElementById('pdfFile').files[0]);
+
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            const concepts = data.concepts;
+
+            // Store concepts and concatenated text in sessionStorage
+            sessionStorage.setItem('concepts', JSON.stringify(concepts));
+            sessionStorage.setItem('concatenatedText', data.concatenatedText);
+
+            displayConcepts(concepts);
+        });
+
+        // Function to display concepts
+        function displayConcepts(concepts) {
+            const conceptsDiv = document.getElementById('concepts');
+            conceptsDiv.innerHTML = '';  // Clear previous concepts
+
+            concepts.forEach(concept => {
+                const link = document.createElement('a');
+                link.href = `/topic.html?concept=${encodeURIComponent(concept)}`;
+                link.textContent = concept;
+                conceptsDiv.appendChild(link);
+                conceptsDiv.appendChild(document.createElement('br'));
+            });
+        }
+
+        // On page load, check if there are concepts stored in sessionStorage and display them
+        window.onload = () => {
+            const storedConcepts = JSON.parse(sessionStorage.getItem('concepts'));
+            if (storedConcepts) {
+                displayConcepts(storedConcepts);
+            }
+        };
+
+        document.getElementById('codebutton').addEventListener('click', () => {
+            window.location.href = `/code.html?`;
+        });
+    </script>
+</body>
+</html>

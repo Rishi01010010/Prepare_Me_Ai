@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+    <h1>Chat</h1>
+    <div id="chat"></div>
+    <input type="text" id="question" placeholder="Ask a question">
+    <button id="sendBtn">Send</button>
+    <button id="backBtn">Back</button>
+
+    <script>
+        document.getElementById('backBtn').addEventListener('click', () => {
+            window.history.back();
+        });
+
+        document.getElementById('sendBtn').addEventListener('click', async () => {
+            const question = document.getElementById('question').value;
+            const urlParams = new URLSearchParams(window.location.search);
+            const concept = urlParams.get('concept');
+            const text = "The concatenated text extracted from your PDF goes here.";
+            const explanation = "The explanation text for the selected concept.";
+
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question, concept, text, explanation })
+            });
+
+            const data = await response.json();
+            const chatDiv = document.getElementById('chat');
+            chatDiv.innerHTML += `<p>You: ${question}</p>`;
+
+            // Split the response, filter empty lines, replace '**' with '-', and replace '*' with ''
+            const botResponseLines = data.answer.split('\n').filter(line => line.trim() !== '');
+            const botResponse = botResponseLines.map(line => line.replace(/\*\*/g, '-').replace(/\*/g, '')).join('<br>');
+            chatDiv.innerHTML += `<p>Bot: ${botResponse}</p>`;
+
+            document.getElementById('question').value = '';
+        });
+    </script>
+</body>
+</html>
